@@ -3,7 +3,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
 
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  await supabase.auth.getSession(); // Call to refresh session if needed, but don't assign 'session' if unused
   const { data: { user } } = await supabase.auth.getUser(); // Also refreshes the session cookie if needed
 
   const { pathname } = request.nextUrl;
