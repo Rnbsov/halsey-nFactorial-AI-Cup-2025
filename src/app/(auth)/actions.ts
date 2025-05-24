@@ -4,20 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { db } from '@/lib/db'; // Drizzle instance
 import { users } from '@/lib/db/schema'; // Users table schema
-import * as z from 'zod';
 import type { User } from '@supabase/supabase-js'; // Import Supabase User type
 
-// Define the Zod schema and type for signup form values
-export const signupFormSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"], 
-});
-
-export type SignupFormValues = z.infer<typeof signupFormSchema>;
+// Import only the necessary types from the new schema file
+import type { SignupFormValues, LoginFormValues } from '@/lib/schemas/auth';
 
 // Define a more specific type for the success data
 export type SignUpSuccessData = {
@@ -70,14 +60,6 @@ export async function signUpUserAction(data: SignupFormValues): Promise<{ error?
   }
 }
 
-// Define the Zod schema and type for login form values
-export const loginFormSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
-});
-
-export type LoginFormValues = z.infer<typeof loginFormSchema>;
-
 // Server action for user login
 export async function loginUserAction(data: LoginFormValues): Promise<{ error?: string } | void> { // Returns void on success due to redirect
   const supabaseClient = await createSupabaseServerClient();
@@ -105,14 +87,10 @@ export async function logoutAction() {
 
   if (error) {
     console.error('Supabase Logout Error:', error);
-    // Optionally, you could return an error object to be handled by the client
-    // For logout, redirecting is usually sufficient even on error, or display a generic error page.
-    return { error: error.message }; 
+    return { error: error.message };
   }
   
-  // Redirect to login page after successful logout
-  // Or to the homepage, depending on desired UX
-  return redirect("/login"); 
+  return redirect("/login");
 }
 
 export async function signInWithGoogleAction() {

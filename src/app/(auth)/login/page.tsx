@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-import { loginUserAction, loginFormSchema, type LoginFormValues } from '../actions';
+import { loginUserAction } from '../actions';
+import { loginFormSchema, type LoginFormValues } from '@/lib/schemas/auth';
 
 export default function LoginPage() {
   const router = useRouter();

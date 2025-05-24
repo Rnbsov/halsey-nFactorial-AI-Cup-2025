@@ -15,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { redirect } from 'next/navigation';
 
-// Import the action, schema, and type from actions.ts
-import { signUpUserAction, signupFormSchema, type SignupFormValues } from '../actions';
+// Import the action from actions.ts and schemas/types from new schema file
+import { signUpUserAction } from '../actions';
+import { signupFormSchema, type SignupFormValues } from '@/lib/schemas/auth';
 
 export default function SignupPage() {
   const form = useForm<SignupFormValues>({
