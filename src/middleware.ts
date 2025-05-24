@@ -39,9 +39,35 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - required for Server Components
-  // https://supabase.com/docs/guides/auth/server-side/nextjs
-  await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser(); // Also refreshes the session cookie if needed
+
+  const { pathname } = request.nextUrl;
+
+  // Auth pages
+  const authPages = ['/login', '/signup'];
+  const isAuthPage = authPages.includes(pathname);
+
+  // If user is on an auth page and is authenticated, redirect to dashboard
+  if (isAuthPage && user) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // If user is not on an auth page and is not authenticated, redirect to login
+  // Allow access to root, api routes, auth callback, and static assets without auth
+  const publicPaths = ['/', '/auth/callback']; // Add any other public paths here like a landing page
+  const isApiRoute = pathname.startsWith('/api');
+  const isStaticAsset = pathname.startsWith('/_next/') || pathname.startsWith('/favicon.ico');
+  
+  if (!isAuthPage && !user && !publicPaths.includes(pathname) && !isApiRoute && !isStaticAsset) {
+     // Allow landing page (root) to be public. If you want root to be protected, remove it from publicPaths
+    if (pathname === '/') {
+      // If you want a public landing page at '/', let it pass.
+      // Otherwise, if '/' should be protected, this block can be removed or changed.
+      return response; 
+    }
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   return response;
 }
@@ -53,8 +79,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - auth/callback is handled by logic inside now, so removing from negative lookahead
+     * It is important to not match api routes here if they are handled differently or are public.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/callback).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/).*)', // Exclude API routes from matcher if they have own auth
   ],
 }; 
