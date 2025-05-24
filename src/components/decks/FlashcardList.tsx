@@ -1,7 +1,7 @@
 'use client';
 
 import type { TFlashcard } from "@/app/dashboard/decks/[deckId]/page"; // Adjust path as needed
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image'; // For displaying flashcard images
 import { Edit3, Trash2, Volume2 } from "lucide-react";
