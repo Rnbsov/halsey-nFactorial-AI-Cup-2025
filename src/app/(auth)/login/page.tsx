@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,41 +12,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { useRouter } from 'next/navigation'; // For redirecting after login
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-const loginFormSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }), // Password can't be empty
-});
-
-type LoginFormValues = z.infer<typeof loginFormSchema>;
-
-async function loginUserAction(data: LoginFormValues): Promise<{ error?: string; success?: boolean }> {
-  'use server';
-  const supabase = createSupabaseServerClient();
-  const router = useRouter(); // This won't work in a server action directly
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email: data.email,
-    password: data.password,
-  });
-
-  if (error) {
-    console.error('Supabase Login Error:', error);
-    // More specific error messages based on error.status or error.code can be added here
-    if (error.message === 'Invalid login credentials') {
-        return { error: 'Invalid email or password. Please try again.' };
-    }
-    return { error: error.message };
-  }
-  
-  // Successful login, session is set by Supabase middleware.
-  // No need to manually insert into Drizzle table as user should already exist from sign up.
-  // Revalidate path or redirect from the client-side after action completes.
-  return { success: true };
-}
+import { loginUserAction, loginFormSchema, type LoginFormValues } from '../actions';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,24 +30,10 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormValues) {
     const result = await loginUserAction(data);
 
-    if (result.error) {
-      toast({
-        title: 'Login Failed',
+    if (result?.error) {
+      toast.error('Login Failed', {
         description: result.error,
-        variant: 'destructive',
       });
-    } else if (result.success) {
-      toast({
-        title: 'Login Successful!',
-        description: 'Welcome back!',
-      });
-      // Redirect to a protected route or dashboard
-      // The middleware should handle session persistence.
-      // router.push('/'); // Example redirect to homepage
-      // For server actions, redirecting is typically done via `redirect` from `next/navigation`
-      // but that needs to be called from the server action itself, or use `router.refresh()` and let middleware handle it.
-      router.refresh(); // This will re-fetch server components and middleware will run
-      router.push('/'); // Redirect to dashboard or home page
     }
   }
 

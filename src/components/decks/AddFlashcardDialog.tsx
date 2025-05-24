@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { addFlashcardAction, type AddFlashcardFormState } from '@/app/dashboard/decks/actions'; 
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { PlusCircle } from 'lucide-react';
 
 const initialState: AddFlashcardFormState = {
@@ -43,11 +43,11 @@ export function AddFlashcardDialog({ deckId, triggerButton }: AddFlashcardDialog
     if (!formState) return;
 
     if (formState.message) {
-        toast({
-            title: formState.success ? 'Flashcard Added' : 'Error',
-            description: formState.message,
-            variant: formState.success ? 'default' : 'destructive',
-        });
+      if (formState.success) {
+        toast.success('Flashcard Added', { description: formState.message });
+      } else {
+        toast.error('Error Adding Flashcard', { description: formState.message });
+      }
     }
 
     if (formState.success) {
