@@ -1,10 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import * as dotenv from 'dotenv';
-
-dotenv.config({
-  path: '.env.local',
-});
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({

@@ -3,9 +3,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import * as dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
